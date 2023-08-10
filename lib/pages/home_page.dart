@@ -10,35 +10,23 @@ class HomePage extends StatefulWidget {
 }
 
 class _HomePageState extends State<HomePage> {
-
-  String _search = "";
+  String _search = ""; // Inicialmente vazio para permitir pesquisa
   int _offset = 0;
 
   Future<Map> _getGifs() async {
     http.Response response;
 
     Uri urlTrending = Uri.parse(
-        "https://api.giphy.com/v1/gifs/trending?api_key=fuoJ7VYfGNWR5dWUzLOWUTKCSVV519LX&limit=20&rating=g&bundle=messaging_non_clips");
+        "https://api.giphy.com/v1/gifs/trending?api_key=fuoJ7VYfGNWR5dWUzLOWUTKCSVV519LX&limit=25&offset=$_offset&rating=g&bundle=messaging_non_clips");
     Uri urlSearch = Uri.parse(
         "https://api.giphy.com/v1/gifs/search?api_key=fuoJ7VYfGNWR5dWUzLOWUTKCSVV519LX&q=$_search&limit=20&offset=$_offset&rating=g&lang=en&bundle=messaging_non_clips");
 
-    if (_search == null) {
-      response = await http.get(urlTrending);
-    } else {
-      response = await http.get(urlSearch);
-    }
+    // Use a URL de pesquisa somente se houver uma pesquisa válida
+    Uri selectedUrl = _search.isEmpty ? urlTrending : urlSearch;
+
+    response = await http.get(selectedUrl);
 
     return json.decode(response.body);
-  }
-
-
-  @override
-  void initState() {
-    super.initState();
-
-    _getGifs().then((map) {
-      print(map);
-    });
   }
 
   @override
@@ -53,23 +41,77 @@ class _HomePageState extends State<HomePage> {
       backgroundColor: Colors.black,
       body: Column(
         children: [
-          const Padding(
-            padding: EdgeInsets.all(10),
+          Padding(
+            padding: const EdgeInsets.all(10),
             child: TextField(
+              onChanged: (value) {
+                setState(() {
+                  _search = value; // Atualiza a pesquisa conforme o usuário digita
+                  _offset = 0; // Reinicia o offset para nova pesquisa
+                });
+              },
               decoration: InputDecoration(
                 labelText: "Search GIFs",
                 labelStyle: TextStyle(color: Colors.white),
                 border: OutlineInputBorder(),
                 focusedBorder: OutlineInputBorder(
-                  borderSide: BorderSide(color: Colors.white, width: 2.0)
-                ),
+                    borderSide: BorderSide(color: Colors.white, width: 2.0)),
               ),
               style: TextStyle(color: Colors.white, fontSize: 18),
               textAlign: TextAlign.center,
             ),
+          ),
+          Expanded(
+            child: FutureBuilder(
+                future: _getGifs(),
+                builder: (context, snapshot) {
+                  switch (snapshot.connectionState) {
+                    case ConnectionState.waiting:
+                    case ConnectionState.none:
+                      return Container(
+                        width: 200,
+                        height: 200,
+                        alignment: Alignment.center,
+                        child: CircularProgressIndicator(
+                          valueColor:
+                          AlwaysStoppedAnimation<Color>(Colors.white),
+                          strokeWidth: 5,
+                        ),
+                      );
+                    default:
+                      if (snapshot.hasError) {
+                        return Container();
+                      } else {
+                        return _createGifTable(context, snapshot);
+                      }
+                  }
+                }),
           )
         ],
       ),
+    );
+  }
+
+  Widget _createGifTable(BuildContext context, AsyncSnapshot snapshot) {
+    final gifData = snapshot.data["data"];
+
+    return GridView.builder(
+      padding: const EdgeInsets.all(10),
+      gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
+        crossAxisCount: 2,
+        crossAxisSpacing: 10,
+        mainAxisSpacing: 10,
+      ),
+      itemCount: gifData.length,
+      itemBuilder: (context, index) {
+        return GestureDetector(
+          child: Image.network(
+            gifData[index]["images"]["fixed_height"]["url"],
+            height: 300,
+            fit: BoxFit.cover,
+          ),
+        );
+      },
     );
   }
 }
