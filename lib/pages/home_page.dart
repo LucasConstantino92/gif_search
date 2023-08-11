@@ -50,14 +50,14 @@ class _HomePageState extends State<HomePage> {
                   _offset = 0; // Reinicia o offset para nova pesquisa
                 });
               },
-              decoration: InputDecoration(
+              decoration: const InputDecoration(
                 labelText: "Search GIFs",
                 labelStyle: TextStyle(color: Colors.white),
                 border: OutlineInputBorder(),
                 focusedBorder: OutlineInputBorder(
                     borderSide: BorderSide(color: Colors.white, width: 2.0)),
               ),
-              style: TextStyle(color: Colors.white, fontSize: 18),
+              style: const TextStyle(color: Colors.white, fontSize: 18),
               textAlign: TextAlign.center,
             ),
           ),
@@ -72,7 +72,7 @@ class _HomePageState extends State<HomePage> {
                         width: 200,
                         height: 200,
                         alignment: Alignment.center,
-                        child: CircularProgressIndicator(
+                        child: const CircularProgressIndicator(
                           valueColor:
                           AlwaysStoppedAnimation<Color>(Colors.white),
                           strokeWidth: 5,
