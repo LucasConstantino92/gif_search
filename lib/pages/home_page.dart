@@ -10,18 +10,17 @@ class HomePage extends StatefulWidget {
 }
 
 class _HomePageState extends State<HomePage> {
-  String _search = ""; // Inicialmente vazio para permitir pesquisa
+  String _search = "";
   int _offset = 0;
 
   Future<Map> _getGifs() async {
     http.Response response;
 
     Uri urlTrending = Uri.parse(
-        "https://api.giphy.com/v1/gifs/trending?api_key=fuoJ7VYfGNWR5dWUzLOWUTKCSVV519LX&limit=25&offset=$_offset&rating=g&bundle=messaging_non_clips");
+        "https://api.giphy.com/v1/gifs/trending?api_key=fuoJ7VYfGNWR5dWUzLOWUTKCSVV519LX&limit=20&offset=$_offset&rating=g&bundle=messaging_non_clips");
     Uri urlSearch = Uri.parse(
-        "https://api.giphy.com/v1/gifs/search?api_key=fuoJ7VYfGNWR5dWUzLOWUTKCSVV519LX&q=$_search&limit=20&offset=$_offset&rating=g&lang=en&bundle=messaging_non_clips");
+        "https://api.giphy.com/v1/gifs/search?api_key=fuoJ7VYfGNWR5dWUzLOWUTKCSVV519LX&q=$_search&limit=19&offset=$_offset&rating=g&lang=en&bundle=messaging_non_clips");
 
-    // Use a URL de pesquisa somente se houver uma pesquisa válida
     Uri selectedUrl = _search.isEmpty ? urlTrending : urlSearch;
 
     response = await http.get(selectedUrl);
@@ -44,10 +43,10 @@ class _HomePageState extends State<HomePage> {
           Padding(
             padding: const EdgeInsets.all(10),
             child: TextField(
-              onChanged: (value) {
+              onSubmitted: (text) {
                 setState(() {
-                  _search = value; // Atualiza a pesquisa conforme o usuário digita
-                  _offset = 0; // Reinicia o offset para nova pesquisa
+                  _search = text;
+                  _offset = 0;
                 });
               },
               decoration: const InputDecoration(
@@ -74,7 +73,7 @@ class _HomePageState extends State<HomePage> {
                         alignment: Alignment.center,
                         child: const CircularProgressIndicator(
                           valueColor:
-                          AlwaysStoppedAnimation<Color>(Colors.white),
+                              AlwaysStoppedAnimation<Color>(Colors.white),
                           strokeWidth: 5,
                         ),
                       );
@@ -92,6 +91,14 @@ class _HomePageState extends State<HomePage> {
     );
   }
 
+  int _getCount(List data) {
+    if (_search.isEmpty) {
+      return data.length;
+    } else {
+      return data.length + 1;
+    }
+  }
+
   Widget _createGifTable(BuildContext context, AsyncSnapshot snapshot) {
     final gifData = snapshot.data["data"];
 
@@ -102,15 +109,39 @@ class _HomePageState extends State<HomePage> {
         crossAxisSpacing: 10,
         mainAxisSpacing: 10,
       ),
-      itemCount: gifData.length,
+      itemCount: _getCount(gifData),
       itemBuilder: (context, index) {
-        return GestureDetector(
-          child: Image.network(
-            gifData[index]["images"]["fixed_height"]["url"],
-            height: 300,
-            fit: BoxFit.cover,
-          ),
-        );
+        if (_search.isEmpty || index < gifData.length) {
+          return GestureDetector(
+            child: Image.network(
+              gifData[index]["images"]["fixed_height"]["url"],
+              height: 300,
+              fit: BoxFit.cover,
+            ),
+          );
+        } else {
+          return GestureDetector(
+            child: Column(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: const [
+                Icon(
+                  Icons.add,
+                  color: Colors.white,
+                  size: 70,
+                ),
+                Text(
+                  "Carregar mais ...",
+                  style: TextStyle(color: Colors.white, fontSize: 22),
+                ),
+              ],
+            ),
+            onTap: () {
+              setState(() {
+                _offset += 19;
+              });
+            },
+          );
+        }
       },
     );
   }
