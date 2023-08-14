@@ -135,10 +135,10 @@ packages:
     dependency: transitive
     description:
       name: mime
-      sha256: "5041f313f4e30fbd70dee7c0403785a4ee270f75830f590e5983960fddf743e4"
+      sha256: e4ff8e8564c03f255408decd16e7899da1733852a9110a58fe6d1b817684a63e
       url: "https://pub.dev"
     source: hosted
-    version: "0.9.7"
+    version: "1.0.4"
   path:
     dependency: transitive
     description:
@@ -151,10 +151,10 @@ packages:
     dependency: "direct main"
     description:
       name: share
-      sha256: fc1647d0c3a8eb648dc6d91d2207e7976c1d941e2165a09cba7c805b0c24467e
+      sha256: "97e6403f564ed1051a01534c2fc919cb6e40ea55e60a18ec23cee6e0ce19f4be"
       url: "https://pub.dev"
     source: hosted
-    version: "0.6.5+4"
+    version: "2.0.4"
   sky_engine:
     dependency: transitive
     description: flutter
